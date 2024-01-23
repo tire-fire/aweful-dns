@@ -13,6 +13,9 @@ jobs:
             image: alpine:3.19
         steps:
             - uses: actions/checkout@v4
+            - name: Install bash
+              run: |
+                    apk add --no-cache bash
             - name: Get version
               id: versioning
               uses: Soumeh-zz/Auto-Versioning@v2.0
@@ -33,9 +36,9 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   files: |
-                      bin/*
+                          bin/*
                   tag_name: ${{ steps.versioning.outputs.tag }}
                   name: Release ${{ github.event.head_commit.message }}
                   body: |
-                      Release ${{ github.ref }}
-                      ${{ steps.versioning.outputs.changelog }}
+                         Release ${{ github.ref }}
+                         ${{ steps.versioning.outputs.changelog }}
