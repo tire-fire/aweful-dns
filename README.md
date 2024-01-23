@@ -44,10 +44,10 @@ The configurations are appended to the dnsmasq configuration file specified in t
 
 ## Assumptions
 
-    dnsmasq Installation: The application assumes that dnsmasq is already installed and configured to read from /etc/dnsmasq.d/aweful-dns.conf on the host system.
-    Team Name Positioning: The team number is dynamically inserted into the domain name in four different positions for versatility in DNS configurations.
-    Configuration Directory: The application expects /root/aweful-dns-confs directory for configuration files, or as passed in the startup arguments.
-    Network: It assumes all networks are /24 and that there won't be more than 99 teams (101-199), and that all teams will have the same DNS server IP address, and that there will be a 1-to-1 NAT from external to internal.
+  * dnsmasq Installation: The application assumes that dnsmasq is already installed and configured to read from /etc/dnsmasq.d/aweful-dns.conf on the host system.
+  * Team Name Positioning: The team number is dynamically inserted into the domain name in four different positions for versatility in DNS configurations.
+  * Configuration Directory: The application expects /root/aweful-dns-confs directory for configuration files, or as passed in the startup arguments.
+  * Network: It assumes all networks are /24 and that there won't be more than 99 teams (101-199), and that all teams will have the same DNS server IP address, and that there will be a 1-to-1 NAT from external to internal.
 
 # DNS Proxy
 A modification of the simple DNS proxy written in go based on [github.com/miekg/dns](https://github.com/miekg/dns)
