@@ -13,9 +13,9 @@ jobs:
             image: alpine:3.19
         steps:
             - uses: actions/checkout@v4
-            - name: Install bash
+            - name: Install version requirements
               run: |
-                    apk add --no-cache bash
+                    apk add --no-cache bash python3 py3-pip
             - name: Get version
               id: versioning
               uses: Soumeh-zz/Auto-Versioning@v2.0
