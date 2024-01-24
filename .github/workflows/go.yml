@@ -13,7 +13,7 @@ jobs:
             - uses: actions/checkout@v4
             - name: Get version
               id: versioning
-              uses: Soumeh-zz/Auto-Versioning@v2.0
+              uses: flynshue/version-action@v0.0.1
             - name: Set up Go 1.21.6
               uses: actions/setup-go@v4
               with:
@@ -37,8 +37,7 @@ jobs:
               with:
                   files: |
                           bin/*
-                  tag_name: ${{ steps.versioning.outputs.tag }}
+                  tag_name: ${{ steps.versioning.outputs.version }}
                   name: Release ${{ github.event.head_commit.message }}
                   body: |
                          Release ${{ github.ref }}
-                         ${{ steps.versioning.outputs.changelog }}
