@@ -9,22 +9,23 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        container:
+            image: alpine:3.19
         steps:
             - uses: actions/checkout@v4
             - name: Get version
               id: versioning
               uses: flynshue/version-action@v0.0.1
-            - name: Install dependencies and build
-              uses: addnab/docker-run-action@v3
+            - name: Set up Go 1.21.6
+              uses: actions/setup-go@v4
               with:
-                image: alpine:3.19
-                run: |
-                      apk add --no-cache curl
-                      curl -LO https://golang.org/dl/go1.21.6.linux-amd64.tar.gz
-                      tar -C /usr/local -xzf go1.21.6.linux-amd64.tar.gz
-                      export PATH=$PATH:/usr/local/go/bin
-                      go get
-                      go build -v -o ./bin/
+                  go-version: 1.21.6
+            - name: Install dependencies
+              run: |
+                    go get 
+            - name: Build
+              run: |
+                    go build -v -o ./bin/
             - name: Release
               id: release
               uses: softprops/action-gh-release@v1
