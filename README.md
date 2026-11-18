@@ -30,8 +30,19 @@ An init script is in `./etc/init.d/aweful-dns` which places logs in `/var/log/aw
 }
 ```
 
+Team numbers are matched both plain and zero-padded (`team6` and `team06`), so a name built from a two-digit identifier resolves.
+
 This will create 30 proxies listening on a localhost address, which will strip team# from the request and forward it on to the external mask + last octet of the dns server.
 So if a request for team6.example.com comes in, dnsmasq will have a registered server for that, it will then get sent to the localhost ip address that handles team 6, the proxy will receive the request, strip the team6 from the request, then forward it on to 10.100.106.132. When the response is recieved that includes the 192.168.220.12 it modifies that to be 10.100.106.12 and returns that to the original requester.
+
+## Docker
+
+`Dockerfile` builds `aweful-dns` and runs it with dnsmasq in one container. Mount the JSON configs at `/confs`; dnsmasq listens on the container's address with caching off and no upstream resolver, so every answer comes from the team's own DNS server. Point a client's resolver at the container's address and it can resolve `<host>.team03.example.com`.
+
+```bash
+docker build -t aweful-dns .
+docker run -d --name aweful-dns -v $PWD/confs:/confs:ro aweful-dns
+```
 
 ## Generation of dnsmasq Configurations
 

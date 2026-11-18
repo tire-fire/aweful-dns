@@ -127,11 +127,19 @@ func writeDnsmasqConf(domainName string, dnsServer string, teamNumber int, dnsma
 	defer file.Close()
 
 	// Add team# before the domain, in the middle of the domain, and after the domain. Add # in the middle of the domain, too.
-	configLines := []string{
-		fmt.Sprintf("team%d.%s.%s", teamNumber, domainParts[0], domainParts[1]),
-		fmt.Sprintf("%s.team%d.%s", domainParts[0], teamNumber, domainParts[1]),
-		fmt.Sprintf("%s.%s.team%d", domainParts[0], domainParts[1], teamNumber),
-		fmt.Sprintf("%s%d.%s", domainParts[0], teamNumber, domainParts[1]),
+	// Quotient fills a team's two-digit identifier into names, so also match the zero-padded number (team03 as well as team3).
+	numbers := []string{fmt.Sprintf("%d", teamNumber)}
+	if padded := fmt.Sprintf("%02d", teamNumber); padded != numbers[0] {
+		numbers = append(numbers, padded)
+	}
+	var configLines []string
+	for _, n := range numbers {
+		configLines = append(configLines,
+			fmt.Sprintf("team%s.%s.%s", n, domainParts[0], domainParts[1]),
+			fmt.Sprintf("%s.team%s.%s", domainParts[0], n, domainParts[1]),
+			fmt.Sprintf("%s.%s.team%s", domainParts[0], domainParts[1], n),
+			fmt.Sprintf("%s%s.%s", domainParts[0], n, domainParts[1]),
+		)
 	}
 
 	for _, line := range configLines {
