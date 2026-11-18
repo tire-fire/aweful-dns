@@ -50,7 +50,12 @@ func main() {
 			}
 			lastIP = ip
 
-			go func(dnsConfigs map[string]interface{}, tn int, ip string, dnsmasqConfig string) {
+			go func(shared map[string]interface{}, tn int, ip string, dnsmasqConfig string) {
+				// Each team needs its own copy: the map is written to and read by every team's goroutine.
+				dnsConfigs := make(map[string]interface{}, len(shared)+1)
+				for k, v := range shared {
+					dnsConfigs[k] = v
+				}
 				dnsConfigs["host"] = ip
 				config := Config{
 					DNSConfigs:  dnsConfigs,
