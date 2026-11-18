@@ -23,11 +23,7 @@ func getResponse(requestMsg *dns.Msg, internal_mask string, external_mask string
 			responseMsg.Answer = append(responseMsg.Answer, *answer)
 
 		default:
-			answer, err := processOtherTypes(defaultServer, &question, requestMsg)
-			if err != nil {
-				return responseMsg, err
-			}
-			responseMsg.Answer = append(responseMsg.Answer, *answer)
+			// Only A answers are mapped onto the team's external range; anything else could point anywhere.
 		}
 	}
 
@@ -43,22 +39,6 @@ func matchesTeamDomain(queryName string, teamDomains []string) (bool, string) {
 	}
 
 	return false, ""
-}
-
-func processOtherTypes(dnsServer string, q *dns.Question, requestMsg *dns.Msg) (*dns.RR, error) {
-	queryMsg := new(dns.Msg)
-	requestMsg.CopyTo(queryMsg)
-	queryMsg.Question = []dns.Question{*q}
-
-	msg, err := lookup(dnsServer, queryMsg)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(msg.Answer) > 0 {
-		return &msg.Answer[0], nil
-	}
-	return nil, fmt.Errorf("not found")
 }
 
 func processTypeA(dnsServer string, q *dns.Question, requestMsg *dns.Msg, internal_mask string, external_mask string, teamDomains []string) (*dns.RR, error) {
@@ -78,10 +58,16 @@ func processTypeA(dnsServer string, q *dns.Question, requestMsg *dns.Msg, intern
 			return nil, err
 		}
 
-		if len(msg.Answer) > 0 {
-			pre_answer := strings.Split(msg.Answer[len(msg.Answer)-1].String(), "\t")
-			better_data := pre_answer[len(pre_answer)-1]
-			new_addr := strings.Replace(better_data, internal_mask, external_mask, -1)
+		// A team's DNS server is team controlled, so an address outside the internal range (another
+		// team's host, the scoring engine's own network) is refused rather than passed through.
+		internalAddr := ""
+		for _, rr := range msg.Answer {
+			if a, ok := rr.(*dns.A); ok && strings.HasPrefix(a.A.String(), internal_mask) {
+				internalAddr = a.A.String()
+			}
+		}
+		if internalAddr != "" {
+			new_addr := external_mask + strings.TrimPrefix(internalAddr, internal_mask)
 			answer, err := dns.NewRR(fmt.Sprintf("%s A %s", q.Name, new_addr))
 			if err != nil {
 				return nil, err
